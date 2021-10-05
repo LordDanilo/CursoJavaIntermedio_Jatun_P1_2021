@@ -4,14 +4,18 @@ public class Juego{
     private boolean enCurso;
     private int filas;
     private int columnas;
+    private int cuadrosDevelados;
     public Juego(int m, int n, int numMinas){
         tablero = new Cuadro[m][n];
         filas = m;
         columnas = n;
         cantMinas = numMinas;
         enCurso = false;
+        cuadrosDevelados = 0;
     }
-
+    public boolean estaEnCurso(){
+        return enCurso;
+    }
     public void prepararTablero(){
         for(int i=0; i<filas; i++){
             for(int j=0; j<columnas; j++){
@@ -55,34 +59,51 @@ public class Juego{
     }
 
     public void jugar(int i, int j){
-        if(esValido(i,j)){
-            if(!tablero[i][j].estaDevelado()){
-                tablero[i][j].develar();
-                int valor = tablero[i][j].getValor();
-                if(valor>0){
-                    System.out.println("Cuadro develado, continua jugando");
-                }else{
-                    if(valor<0){
-                        System.out.println("Activaste una mina, perdiste el juego");
+        if(enCurso){
+            if(esValido(i,j)){
+                if(!tablero[i][j].estaDevelado()){
+                    tablero[i][j].develar();
+                    cuadrosDevelados++;
+                    verificarFinDeJuego();
+                    int valor = tablero[i][j].getValor();
+                    if(valor>0){
+                        System.out.println("Cuadro develado, continua jugando");
                     }else{
-                        develar(i-1, j-1);
-                        develar(i-1, j);
-                        develar(i-1, j+1);
-                        develar(i, j-1);
-                        develar(i, j+1);
-                        develar(i+1, j-1);
-                        develar(i+1, j);
-                        develar(i+1, j+1);
+                        if(valor<0){
+                            System.out.println("Activaste una mina, perdiste el juego");
+                            enCurso = false;
+                        }else{
+                            develar(i-1, j-1);
+                            develar(i-1, j);
+                            develar(i-1, j+1);
+                            develar(i, j-1);
+                            develar(i, j+1);
+                            develar(i+1, j-1);
+                            develar(i+1, j);
+                            develar(i+1, j+1);
+                            System.out.println("Cuadros develados, continua jugando");
+                        }
                     }
                 }
             }
+        }else{
+            System.out.println("El juego ya no esta en curso");
+        }
+        imprimir();
+        System.out.println("pppppppppppppppppppppppppppppppppp");
+    }
+    private void verificarFinDeJuego(){
+        if((filas*columnas)-cantMinas == cuadrosDevelados){
+            enCurso = false;
+            System.out.println("Ganaste El juego!!! Felicidades");
+            imprimir();
         }
     }
-
     private void develar(int i, int j){
         if(esValido(i,j)){
-            if(tablero[i][j].getValor() >= 0){
+            if(tablero[i][j].getValor() >= 0 && !tablero[i][j].estaDevelado()){
                 tablero[i][j].develar();
+                cuadrosDevelados++;
                 int valor = tablero[i][j].getValor();
                 if(valor==0){
                     develar(i-1, j-1);
@@ -101,7 +122,16 @@ public class Juego{
     public void imprimir(){
         for(int i=0; i<filas; i++){
             for(int j=0; j<columnas; j++){
-                System.out.print(tablero[i][j].getValor()+" ");
+                if(tablero[i][j].estaDevelado()){
+                    int valor = tablero[i][j].getValor();
+                    if(valor>=0){
+                        System.out.print(valor);
+                    }else{
+                        System.out.print("*");
+                    }
+                }else{
+                    System.out.print("-");
+                }
             }
             System.out.println();
         }
